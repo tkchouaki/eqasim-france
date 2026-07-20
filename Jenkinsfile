@@ -14,8 +14,12 @@ pipeline {
                 COMMIT=$(git describe --always)
                 BRANCH=$(git rev-parse --abbrev-ref HEAD)
                 export OUTPUT="/mnt/data/$BRANCH/$COMMIT"
+                echo "Outputting to: $OUTPUT"
                 mkdir -p "$OUTPUT"
                 cd /mnt/data/utils
+                for item in "$BASE/pipeline_cache" "$BASE/pipeline_data" "$OUTPUT" "$BASE/config.yml"; do
+                    echo $item
+                done
                 ./prepare_config.sh "$BASE/pipeline_cache" "$BASE/pipeline_data" "$OUTPUT" "$BASE/config.yml"
                 cd "$BASE"
                 echo "${OUTPUT}" > output_path.txt
