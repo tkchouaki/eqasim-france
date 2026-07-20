@@ -7,12 +7,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: "feat/utility-scripts", url: 'https://github.com/eqasim-org/eqasim-france.git'
-            }
-        }
-
         stage('Prepare') {
             steps {
                 sh '''
