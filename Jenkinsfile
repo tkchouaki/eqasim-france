@@ -30,7 +30,7 @@ pipeline {
         stage('DownloadData') {
             steps {
                 sh 'uv --no-cache sync'
-                sh 'uv --no-cache run scripts/download.py -y config.yml'
+                sh 'uv --no-cache run scripts/download.py -y --no-check-certificate config.yml'
             }
         }
 
