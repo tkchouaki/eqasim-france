@@ -15,7 +15,7 @@ import rich
 TEMPORARY_PATH = Path(".script_data")
 CODES_URL = "https://www.insee.fr/fr/statistiques/fichier/7708995/reference_IRIS_geo2024.zip"
 
-def load_codes(verify=True):
+def load_codes(verify=True, timeout=None):
     if not os.path.exists(TEMPORARY_PATH / "codes.zip"):
         os.makedirs(TEMPORARY_PATH, exist_ok = True)
 
@@ -75,7 +75,7 @@ class Registry:
 
         return any
 
-    def download(self, verify=True):
+    def download(self, verify=True, timeout=None):
         queue = []
 
         for item in self.registry:
@@ -88,7 +88,7 @@ class Registry:
             os.makedirs(TEMPORARY_PATH, exist_ok = True)
             os.makedirs((self.data_path / item["target"]).parent, exist_ok = True)
 
-            response = requests.get(item["url"], stream = True, verify=verify)
+            response = requests.get(item["url"], stream = True, verify=verify, timeout=timeout)
             response.raise_for_status()
 
             total = int(response.headers.get('content-length', 0))
@@ -109,7 +109,8 @@ HELP_CONFIG_PATH = "Path to your config file"
 
 def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
          yes: Annotated[bool, typer.Option("--yes", "-y", help="Automatically answer yes")] = False,
-         no_check_certificate: Annotated[bool, typer.Option("--no-check-certificate", help="Don't verify TLS certificates")] = False):
+         no_check_certificate: Annotated[bool, typer.Option("--no-check-certificate", help="Don't verify TLS certificates")] = False,
+         timeout: Annotated[int, typer.Option("--timeout", help="Timeout before starting to recieve data for each download")] = None):
     if not os.path.exists(config_path):
         print("[red]Config path does not exist[/red]")
         exit()
@@ -127,7 +128,7 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
         print("  [green]exists[/green]")
 
     print("Loading zoning data ...")
-    df_codes = load_codes()
+    df_codes = load_codes(not no_check_certificate, timeout = timeout)
 
     print("Identifying requested departments ...")
     regions = [str(item) for item in config["config"].get("regions", ["11"])]
@@ -353,7 +354,7 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
         if not yes and not Confirm.ask("Continue downloading data?"):
             exit()
 
-        registry.download(verify=not no_check_certificate)
+        registry.download(verify=not no_check_certificate, timeout=timeout)
 
     print("[green]You are up to date![/green]")
 
