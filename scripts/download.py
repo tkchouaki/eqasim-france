@@ -350,6 +350,7 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
     if any:
         print("[yellow]In case a download aborts, try starting the script again.[/yellow]")
         print("[yellow]Note that for most data sources progress cannot be shown.[/yellow]")
+        print("[yellow]Downloads will each have a timeout of %s before starting to recieve data" % str(timeout))
 
         if not yes and not Confirm.ask("Continue downloading data?"):
             exit()
