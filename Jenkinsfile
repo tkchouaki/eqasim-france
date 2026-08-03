@@ -10,6 +10,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh '''
+                whoami
                 apt update
                 apt install zip
                 BASE=$(pwd)
