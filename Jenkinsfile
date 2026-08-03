@@ -45,4 +45,10 @@ pipeline {
             }
         }
     }
+
+    post {
+        success {
+            archiveArtifacts artifacts: 'pipeline_output/*', fingerprint: true
+        }
+    }
 }
