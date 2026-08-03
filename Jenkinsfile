@@ -10,9 +10,6 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh '''
-                whoami
-                apt update
-                apt install zip
                 BASE=$(pwd)
                 export OUTPUT="$BASE/pipeline_output"
                 echo "Outputting to: $OUTPUT"
