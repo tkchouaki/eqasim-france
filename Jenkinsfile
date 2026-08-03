@@ -11,12 +11,14 @@ pipeline {
             steps {
                 sh '''
                 BASE=$(pwd)
-                COMMIT=$(git describe --always)
-                BRANCH=$(git rev-parse --abbrev-ref HEAD)
                 export OUTPUT="$BASE/pipeline_output"
                 echo "Outputting to: $OUTPUT"
                 rm -rf "$OUTPUT"
                 mkdir -p "$OUTPUT"
+                rm -rf pipeline_data
+                mkdir pipeline_data
+                rm -rf pipeline_cache
+                mkdir pipeline_cache
                 cd /mnt/data/utils
                 ./prepare_config.sh "$BASE/pipeline_cache" "$BASE/pipeline_data" "$OUTPUT" "$BASE/config.yml"
                 cd "$BASE"
