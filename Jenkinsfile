@@ -29,7 +29,7 @@ pipeline {
         stage('DownloadData') {
             steps {
                 sh 'rm -rf .home && mkdir .home'
-                sh 'EXPORT HOME=$(pwd)/.home'
+                sh 'export HOME=$(pwd)/.home'
                 sh 'uv --no-cache sync'
                 sh 'uv --no-cache run scripts/download.py -y --no-check-certificate --timeout 300 config.yml'
             }
