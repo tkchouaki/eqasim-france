@@ -10,6 +10,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh '''
+                apt install zip
                 BASE=$(pwd)
                 export OUTPUT="$BASE/pipeline_output"
                 echo "Outputting to: $OUTPUT"
@@ -43,6 +44,7 @@ pipeline {
             steps {
                 sh '''
                 rm -rf pipeline_data pipeline_cache
+                rm -rf output_0.1pct.zip
                 cd pipeline_output
                 zip ../output_0.1pct *
                 cd ..
