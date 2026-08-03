@@ -41,14 +41,20 @@ pipeline {
 
         stage('Cleanup') {
             steps {
-                sh '''echo "Finished" '''
+                sh '''
+                rm -rf pipeline_data pipeline_cache
+                cd pipeline_output
+                zip ../output_0.1pct *
+                cd ..
+                rm -rf pipeline_output
+                '''
             }
         }
     }
 
     post {
         success {
-            archiveArtifacts artifacts: 'pipeline_output/*', fingerprint: true
+            archiveArtifacts artifacts: 'output_0.1pct.zip', fingerprint: true
         }
     }
 }
