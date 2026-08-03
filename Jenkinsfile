@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'ghcr.io/astral-sh/uv:debian'
+            image 'ghcr.io/eqasim-org/eqasim-france:latest'
             args '-v /mnt/data/jenkins_data:/mnt/data -i --entrypoint='
         }
     }
