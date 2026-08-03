@@ -20,6 +20,7 @@ pipeline {
                 cd /mnt/data/utils
                 ./prepare_config.sh "$BASE/pipeline_cache" "$BASE/pipeline_data" "$OUTPUT" "$BASE/config.yml"
                 cd "$BASE"
+                '''
             }
         }
 
