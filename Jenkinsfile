@@ -13,25 +13,19 @@ pipeline {
                 BASE=$(pwd)
                 COMMIT=$(git describe --always)
                 BRANCH=$(git rev-parse --abbrev-ref HEAD)
-                export OUTPUT="/mnt/data/$BRANCH/$COMMIT"
+                export OUTPUT="$BASE/pipeline_output"
                 echo "Outputting to: $OUTPUT"
+                rm -rf "$OUTPUT"
                 mkdir -p "$OUTPUT"
                 cd /mnt/data/utils
                 ./prepare_config.sh "$BASE/pipeline_cache" "$BASE/pipeline_data" "$OUTPUT" "$BASE/config.yml"
                 cd "$BASE"
-                echo "${OUTPUT}" > output_path.txt
-                '''
-                script {
-                    def output = sh(returnStdout: true, script: '''cat output_path.txt''').trim()
-                }
             }
         }
 
         stage('DownloadData') {
             steps {
                 sh 'uv --no-cache sync'
-                sh 'ls pipeline_data/bpe_2025'
-                sh 'cat config.yml'
                 sh 'uv --no-cache run scripts/download.py -y --no-check-certificate --timeout 300 config.yml'
             }
         }
