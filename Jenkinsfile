@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'ghcr.io/eqasim-org/eqasim-france:main'
-            args '-v /mnt/data/jenkins_data:/mnt/data -i --entrypoint='
+            args '-v /mnt/data/jenkins_data:/mnt/data -i --entrypoint=/bin/bash'
         }
     }
 
