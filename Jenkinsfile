@@ -10,7 +10,8 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh '''
-                sudo apt install zip
+                apt update
+                apt install zip
                 BASE=$(pwd)
                 export OUTPUT="$BASE/pipeline_output"
                 echo "Outputting to: $OUTPUT"
