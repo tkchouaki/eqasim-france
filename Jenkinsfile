@@ -21,8 +21,9 @@ pipeline {
                 mkdir pipeline_cache
                 python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64', 'yq')"
                 chmod +x yq
-                ./yq -i ".working_directory = \"$BASE/pipeline_cache\" | .config.data_path = \"$BASE/pipeline_data\" | .config.output_path = \"$OUTPUT\" " config.yml
+                ./yq -i ".working_directory=test" config.yml
                 cat config.yml
+                ./yq -i ".working_directory = \"$BASE/pipeline_cache\" | .config.data_path = \"$BASE/pipeline_data\" | .config.output_path = \"$OUTPUT\" " config.yml
                 # cd /mnt/data/utils
                 # ./prepare_config.sh "$BASE/pipeline_cache" "$BASE/pipeline_data" "$OUTPUT" "$BASE/config.yml"
                 # cd "$BASE"
