@@ -42,14 +42,16 @@ pipeline {
 
         stage('RunPipeline') {
             steps {
-                sh 'uv --no-cache run -m synpp config.yml'
+                sh '''
+                    unset https_proxy
+                    uv --no-cache run -m synpp config.yml
+                '''
             }
         }
 
         stage('Cleanup') {
             steps {
                 sh '''
-                unset $https_proxy
                 rm -rf pipeline_data pipeline_cache
                 rm -rf output_0.1pct.tar.gz
                 tar -czf output_0.1pct.tar.gz pipeline_output/*
