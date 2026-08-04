@@ -63,7 +63,7 @@ pipeline {
 
     post {
         success {
-            archiveArtifacts artifacts: 'output_0.1pct.zip', fingerprint: true
+            archiveArtifacts artifacts: 'output_0.1pct.tar.gz', fingerprint: true
         }
     }
 }
