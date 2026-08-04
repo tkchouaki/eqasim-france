@@ -31,8 +31,8 @@ pipeline {
                 cp config.yml config_10pct.yml
 
                 # setting up different sampling rates and output paths
-                ./yq -i ".config.output_path = \\"$BASE/output_1pct\\" | .config.sampling_rate = \\"0.01\\"" confg_1pct.yml
-                ./yq -i ".config.output_path = \\"$BASE/output_10pct\\" | .config.sampling_rate = \\"0.1\\"" confg_10pct.yml
+                ./yq -i ".config.output_path = \\"$BASE/output_1pct\\" | .config.sampling_rate = \\"0.01\\"" config_1pct.yml
+                ./yq -i ".config.output_path = \\"$BASE/output_10pct\\" | .config.sampling_rate = \\"0.1\\"" config_10pct.yml
                 '''
             }
         }
