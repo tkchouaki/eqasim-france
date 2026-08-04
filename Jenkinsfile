@@ -77,7 +77,7 @@ pipeline {
 
     post {
         success {
-            archiveArtifacts artifacts: 'output_0.1pct.tar.gz output_1pct.tar.gz output_10pct.tar.gz', fingerprint: true
+            archiveArtifacts artifacts: 'output_0.1pct.tar.gz,output_1pct.tar.gz,output_10pct.tar.gz', fingerprint: true
         }
     }
 }
