@@ -35,11 +35,10 @@ pipeline {
                 sh 'rm -rf .home && mkdir .home'
                 sh '''
                     export HOME=$(pwd)/.home
-                    export https_proxy_backup=$https_proxy
-                    unset https_proxy
                     uv --no-cache sync
-                    export https_proxy=$https_proxy_backup
+                    export https_proxy=$download_proxy
                     uv --no-cache run scripts/download.py -y --no-check-certificate --timeout 300 config.yml
+                    unset https_proxy
                 '''
             }
         }
@@ -47,7 +46,6 @@ pipeline {
         stage('RunPipeline') {
             steps {
                 sh '''
-                    unset https_proxy
                     uv --no-cache run -m synpp config.yml
                 '''
             }
