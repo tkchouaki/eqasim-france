@@ -51,11 +51,25 @@ pipeline {
             }
         }
 
-        stage('RunPipeline') {
+        stage('Run 0.1%') {
             steps {
                 sh '''
                     uv --no-cache run -m synpp config_0.1pct.yml
+                '''
+            }
+        }
+
+        stage('Run 1%') {
+            steps {
+                sh '''
                     uv --no-cache run -m synpp config_1pct.yml
+                '''
+            }
+        }
+
+        stage('Run 10%') {
+            steps {
+                sh '''
                     uv --no-cache run -m synpp config_10pct.yml
                 '''
             }
