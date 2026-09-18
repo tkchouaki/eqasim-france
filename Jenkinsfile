@@ -25,6 +25,18 @@ pipeline {
     }
 
     stages {
+        stage('Test param') {
+            steps {
+                script {
+                    def samplingRates = params.sampling_rates.tokenize()
+                    for (def value in samplingRates) {
+                        sh '''
+                            echo "${value}"
+                        '''
+                    }
+                }
+            }
+        }
         stage('Prepare') {
             steps {
                 sh '''
