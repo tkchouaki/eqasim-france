@@ -28,8 +28,6 @@ pipeline {
         stage('Test param') {
             steps {
                 script {
-                    echo "class"
-                    echo params.sampling_rates.getClass()
                     echo "value"
                     echo params.sampling_rates
                     echo "tokenize"
