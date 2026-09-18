@@ -2,17 +2,17 @@ pipeline {
     parameters {
         text(
             name: "config_overrides",
-            defaultValue: "config:\n  random_seed: 1234",
+            defaultValue: params.config_overrides ?:"config:\n  random_seed: 1234",
             description: "Parts of yaml config to override, the default has no effect as it rewrite the same random seed"
         )
         string(
             name: "cache_server",
-            defaultValue: "false",
+            defaultValue: params.cache_server ?:"false",
             description: "URL of the cache server to use, False not use any server"
         )
         string(
             name: "sampling_rates",
-            defaultValue: "0.001",
+            defaultValue: params.sampling_rates ?:"0.001",
             description: "Space-separated list of sampling rates"
         )
     }
