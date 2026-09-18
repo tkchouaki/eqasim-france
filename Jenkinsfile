@@ -2,10 +2,7 @@ pipeline {
     parameters {
         text(
             name: "config_overrides",
-            defaultValue: """
-            config:
-                random_seed: 1234
-            """,
+            defaultValue: "config:\n  random_seed: 1234",
             description: "Parts of yaml config to override, the default has no effect as it rewrite the same random seed"
         ),
         string(
