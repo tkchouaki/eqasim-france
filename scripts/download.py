@@ -7,6 +7,7 @@ from rich.progress import Progress
 from rich.prompt import Confirm
 
 import os, yaml, requests, sys, shutil
+import inspect
 
 import pandas as pd
 import zipfile
@@ -113,6 +114,32 @@ class Registry:
 HELP_CONFIG_PATH = "Path to your config file"
 
 
+def infer_value(value: str):
+    if value.lower() in ("true", "false"):
+        return value.lower() == "true"
+    try:
+        return int(value)
+    except ValueError:
+        pass
+    try:
+        return float(value)
+    except ValueError:
+        pass
+    return value
+
+
+def parse_kwargs(items: list[str]) -> dict:
+    result = {}
+    for item in items:
+        key, separator, value = item.partition("=")
+        if not separator:
+            raise ValueError(
+                f"Expected KEY=VALUE, got {item!r}"
+            )
+        result[key] = infer_value(value)
+    return result
+
+
 def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
          yes: Annotated[bool, typer.Option("--yes", "-y", help="Automatically answer yes")] = False,
          requests_kwargs: list[str] | None = typer.Option(None, "--requests",
@@ -121,7 +148,7 @@ def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
         print("[red]Config path does not exist[/red]")
         exit()
 
-    requests_kwargs = {key: value for key, value in [item.split("=") for item in requests_kwargs or []]}
+    requests_kwargs = parse_kwargs(requests_kwargs or [])
 
     print("Loading input config ...")
     with open(config_path) as f:
