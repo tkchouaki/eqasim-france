@@ -36,6 +36,7 @@ pipeline {
                     for (def v in test) {
                         echo v
                         sh '''
+                        v='''+v+'''
                         echo $v
                         '''
                     }
