@@ -25,35 +25,6 @@ pipeline {
     }
 
     stages {
-        stage('Test param') {
-            steps {
-                script {
-                    for (def v in params.sampling_rates.toString().trim().split(/\s+/)) {
-                        echo v
-                        sh '''
-                        v='''+v+'''
-                        echo $v
-                        '''
-                    }
-
-                    echo "tokenize"
-                    echo params.sampling_rates.toString().tokenize()
-                    echo "split"
-                    echo params.sampling_rates.toString().split(" ")
-                    echo "done"
-                    sh '''
-                      echo $0
-                      echo "$sampling_rates"
-                      sampling_array=($sampling_rates)
-                      echo "Here"
-                      for i in "${sampling_array[@]}"
-                      do
-                        echo "Sampling rate: $i"
-                      done
-                    '''
-                }
-            }
-        }
         stage('Prepare') {
             steps {
                 sh '''
@@ -98,6 +69,7 @@ pipeline {
                     def samplingRates = params.sampling_rates.tokenize()
                     for (def samplingRate in samplingRates) {
                         sh '''
+                            samplingRate='''+samplingRate+'''
                             rm -rf "pipeline_output_${samplingRate}"
                             mkdir "pipeline_output_${samplingRate}"
                             uv --no-cache run -m synpp --config sampling_rate "${samplingRate}" --config output_path "pipeline_output_${samplingRate}" config.yml
