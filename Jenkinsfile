@@ -31,7 +31,7 @@ pipeline {
                     def samplingRates = params.sampling_rates.tokenize()
                     sh '''
                         sampling_array=($sampling_rates)
-                        for i in "${sampling_array[@]}}"
+                        for i in "${sampling_array[@]}"
                         do
                             echo "Sampling rate: $i"
                         done
