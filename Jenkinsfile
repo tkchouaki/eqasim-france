@@ -35,6 +35,9 @@ pipeline {
                     echo "done trimming"
                     for (def v in test) {
                         echo v
+                        sh '''
+                        echo $v
+                        '''
                     }
 
                     echo "tokenize"
