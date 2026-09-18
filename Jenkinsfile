@@ -1,4 +1,12 @@
 pipeline {
+    parameters {
+        string(
+            name: "cache_server",
+            defaultValue: "false",
+            description: "URL of the cache server to use, False not use any server"
+        )
+    }
+
     agent {
         docker {
             image 'ghcr.io/eqasim-org/eqasim-france:main'
