@@ -44,7 +44,7 @@ pipeline {
                     rm -rf .home && mkdir .home
                     export HOME=$(pwd)/.home
                     uv --no-cache sync
-                    uv --no-cache run scripts/download.py -y --requests verify=false --requests timeout=300 --url-prefix "$url_prefix" config.yml
+                    uv --no-cache run scripts/download.py -y --requests verify=false --requests timeout=300 --cache-server "$cache_server" config.yml
                 '''
             }
         }
