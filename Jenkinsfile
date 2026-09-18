@@ -1,10 +1,18 @@
 pipeline {
     parameters {
+        text(
+            name: "config_overrides"
+            defaultValue: """
+            config:
+                random_seed: 1234
+            """,
+            description: "Parts of yaml config to override, the default has no effect as it rewrite the same random seed"
+        ),
         string(
             name: "cache_server",
             defaultValue: "false",
             description: "URL of the cache server to use, False not use any server"
-        )
+        ),
     }
 
     agent {
@@ -49,6 +57,10 @@ pipeline {
             steps {
                 // Uv downloads to home, we need to set up a location that the current user is sure to be able to write into
                 sh '''
+                    cat "$config_overrides" > test.yaml
+
+                    cat test.yaml
+
                     rm -rf .home && mkdir .home
                     export HOME=$(pwd)/.home
                     uv --no-cache sync
