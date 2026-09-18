@@ -136,7 +136,7 @@ def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
         print("  [green]exists[/green]")
 
     print("Loading zoning data ...")
-    df_codes = load_codes(**requests_kwargs)
+    df_codes = load_codes(requests_kwargs)
 
     print("Identifying requested departments ...")
     regions = [str(item) for item in config["config"].get("regions", ["11"])]
