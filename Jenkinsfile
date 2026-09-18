@@ -28,7 +28,7 @@ pipeline {
         stage('Test param') {
             steps {
                 script {
-                    echo params.sampling_rates
+                    echo params.sampling_rates.tokenize()
                     sh '''
                       echo $0
                       echo "$sampling_rates"
