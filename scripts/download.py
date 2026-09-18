@@ -7,22 +7,20 @@ from rich.progress import Progress
 from rich.prompt import Confirm
 
 import os, yaml, requests, sys, shutil
-import inspect
 
 import pandas as pd
 import zipfile
-import rich
 
 TEMPORARY_PATH = Path(".script_data")
 CODES_URL = "https://www.insee.fr/fr/statistiques/fichier/7708995/reference_IRIS_geo2024.zip"
 
 
-def load_codes(requests_kwargs: dict):
+def load_codes(requests_kwargs: dict, url_prefix=""):
     if not os.path.exists(TEMPORARY_PATH / "codes.zip"):
         os.makedirs(TEMPORARY_PATH, exist_ok=True)
 
         print("Downloading zoning codes from INSEE ...")
-        response = requests.get(CODES_URL, stream=True, **requests_kwargs)
+        response = requests.get(url_prefix + CODES_URL, stream=True, **requests_kwargs)
         response.raise_for_status()
 
         total = int(response.headers.get('content-length', 0))
@@ -54,9 +52,10 @@ def load_codes(requests_kwargs: dict):
 
 
 class Registry:
-    def __init__(self, data_path: Path):
+    def __init__(self, data_path: Path, url_prefix: str=""):
         self.data_path = data_path
         self.registry = []
+        self.url_prefix = url_prefix
 
     def register(self, name, url, target):
         self.registry.append({"name": name, "url": url, "target": target})
@@ -92,7 +91,7 @@ class Registry:
             os.makedirs(TEMPORARY_PATH, exist_ok=True)
             os.makedirs((self.data_path / item["target"]).parent, exist_ok=True)
 
-            response = requests.get(item["url"], stream=True, **requests_kwargs)
+            response = requests.get(self.url_prefix + item["url"], stream=True, **requests_kwargs)
             response.raise_for_status()
 
             total = int(response.headers.get('content-length', 0))
@@ -143,7 +142,8 @@ def parse_kwargs(items: list[str]) -> dict:
 def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
          yes: Annotated[bool, typer.Option("--yes", "-y", help="Automatically answer yes")] = False,
          requests_kwargs: list[str] | None = typer.Option(None, "--requests",
-                                                          help="Additional key=value parameters to pass to requests.get")):
+                                                          help="Additional key=value parameters to pass to requests.get"),
+         url_prefix: Annotated[str, typer.Option("--url-prefix", help="Prefix to apply to all download URLs")]=""):
     if not os.path.exists(config_path):
         print("[red]Config path does not exist[/red]")
         exit()
@@ -163,7 +163,7 @@ def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
         print("  [green]exists[/green]")
 
     print("Loading zoning data ...")
-    df_codes = load_codes(requests_kwargs)
+    df_codes = load_codes(requests_kwargs, url_prefix)
 
     print("Identifying requested departments ...")
     regions = [str(item) for item in config["config"].get("regions", ["11"])]
@@ -182,7 +182,7 @@ def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
         exit()
 
     # identify data sets
-    registry = Registry(data_path)
+    registry = Registry(data_path, url_prefix)
 
     registry.register(
         "Census data (RP 2022)",

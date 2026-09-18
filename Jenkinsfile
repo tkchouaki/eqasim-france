@@ -44,9 +44,7 @@ pipeline {
                     rm -rf .home && mkdir .home
                     export HOME=$(pwd)/.home
                     uv --no-cache sync
-                    export https_proxy=$download_proxy
-                    uv --no-cache run scripts/download.py -y --requests verify=false --requests timeout=300 config.yml
-                    unset https_proxy
+                    uv --no-cache run scripts/download.py -y --requests verify=false --requests timeout=300 --url-prefix "$url_prefix" config.yml
                 '''
             }
         }
