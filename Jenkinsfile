@@ -28,12 +28,7 @@ pipeline {
         stage('Test param') {
             steps {
                 script {
-                    echo "value"
-                    echo params.sampling_rates.toString()
-                    echo "trim and split"
-                    def test = params.sampling_rates.toString().trim().split(/\s+/)
-                    echo "done trimming"
-                    for (def v in test) {
+                    for (def v in params.sampling_rates.toString().trim().split(/\s+/)) {
                         echo v
                         sh '''
                         v='''+v+'''
