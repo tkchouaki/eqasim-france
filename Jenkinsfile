@@ -28,14 +28,15 @@ pipeline {
         stage('Test param') {
             steps {
                 script {
-                    sh '''#!bin/bash
-                          echo "$sampling_rates"
-                          sampling_array=($sampling_rates)
-                          echo "Here"
-                          for i in "${sampling_array[@]}"
-                          do
-                            echo "Sampling rate: $i"
-                          done
+                    sh '''
+                      echo $0
+                      echo "$sampling_rates"
+                      sampling_array=($sampling_rates)
+                      echo "Here"
+                      for i in "${sampling_array[@]}"
+                      do
+                        echo "Sampling rate: $i"
+                      done
                     '''
                 }
             }
