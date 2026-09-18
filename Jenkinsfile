@@ -29,6 +29,7 @@ pipeline {
             steps {
                 script {
                     echo params.sampling_rates
+                    echo params.sampling_rates.getClass()
                     echo params.sampling_rates.tokenize()
                     echo params.sampling_rates.split(" ")
                     sh '''
