@@ -4,7 +4,7 @@ pipeline {
             name: "config_overrides",
             defaultValue: "config:\n  random_seed: 1234",
             description: "Parts of yaml config to override, the default has no effect as it rewrite the same random seed"
-        ),
+        )
         string(
             name: "cache_server",
             defaultValue: "false",
