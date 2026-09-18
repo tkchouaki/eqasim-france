@@ -28,6 +28,7 @@ pipeline {
         stage('Test param') {
             steps {
                 script {
+                    echo params.sampling_rates
                     sh '''
                       echo $0
                       echo "$sampling_rates"
