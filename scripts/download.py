@@ -143,7 +143,8 @@ def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
          yes: Annotated[bool, typer.Option("--yes", "-y", help="Automatically answer yes")] = False,
          requests_kwargs: list[str] | None = typer.Option(None, "--requests",
                                                           help="Additional key=value parameters to pass to requests.get"),
-         url_prefix: Annotated[str, typer.Option("--url-prefix", help="Prefix to apply to all download URLs")]=""):
+         cache_server: Annotated[str, typer.Option("--cache-server", help="URL of the cache server from which to retrieve the data")]=None):
+
     if not os.path.exists(config_path):
         print("[red]Config path does not exist[/red]")
         exit()
@@ -163,6 +164,10 @@ def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
         print("  [green]exists[/green]")
 
     print("Loading zoning data ...")
+    if cache_server is None:
+        url_prefix=""
+    else:
+        url_prefix = cache_server + "?url="
     df_codes = load_codes(requests_kwargs, url_prefix)
 
     print("Identifying requested departments ...")
