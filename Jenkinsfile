@@ -71,7 +71,7 @@ pipeline {
                         sh '''
                             rm -rf "pipeline_output_${samplingRate}"
                             mkdir "pipeline_output_${samplingRate}"
-                            uv --no-cache run -m synpp config.yml --config sampling_rate "${samplingRate}" --config output_path "pipeline_output_${samplingRate}"
+                            uv --no-cache run -m synpp --config sampling_rate "${samplingRate}" --config output_path "pipeline_output_${samplingRate}" config.yml
                             tar -czf pipeline_output_${samplingRate}.tar.gz pipeline_output_${samplingRate}/*
                             rm -rf "pipeline_output_${samplingRate}"
                         '''
