@@ -15,12 +15,13 @@ import rich
 TEMPORARY_PATH = Path(".script_data")
 CODES_URL = "https://www.insee.fr/fr/statistiques/fichier/7708995/reference_IRIS_geo2024.zip"
 
-def load_codes(verify=True, timeout=None):
+
+def load_codes(requests_kwargs: dict):
     if not os.path.exists(TEMPORARY_PATH / "codes.zip"):
-        os.makedirs(TEMPORARY_PATH, exist_ok = True)
+        os.makedirs(TEMPORARY_PATH, exist_ok=True)
 
         print("Downloading zoning codes from INSEE ...")
-        response = requests.get(CODES_URL, stream = True, verify=verify)
+        response = requests.get(CODES_URL, stream=True, **requests_kwargs)
         response.raise_for_status()
 
         total = int(response.headers.get('content-length', 0))
@@ -28,17 +29,18 @@ def load_codes(verify=True, timeout=None):
             task = progress.add_task("Downloading ...", total=total)
 
             with open(TEMPORARY_PATH / "codes.zip", "wb+") as file:
-                for chunk in response.iter_content(chunk_size = 8192):
+                for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
                         file.write(chunk)
-                        progress.update(task, advance = len(chunk))
-        
+                        progress.update(task, advance=len(chunk))
+
     if not os.path.exists(TEMPORARY_PATH / "codes.parquet"):
         with zipfile.ZipFile(TEMPORARY_PATH / "codes.zip") as archive:
             with archive.open("reference_IRIS_geo2024.xlsx") as f:
                 df_codes = pd.read_excel(f,
-                    skiprows = 5, sheet_name = "Emboitements_IRIS",dtype={"CODE_IRIS":str,"DEPCOM":str,"REG":str}
-                )[["CODE_IRIS", "DEPCOM", "DEP", "REG"]].rename(columns = {
+                                         skiprows=5, sheet_name="Emboitements_IRIS",
+                                         dtype={"CODE_IRIS": str, "DEPCOM": str, "REG": str}
+                                         )[["CODE_IRIS", "DEPCOM", "DEP", "REG"]].rename(columns={
                     "CODE_IRIS": "iris_id",
                     "DEPCOM": "commune_id",
                     "DEP": "departement_id",
@@ -49,13 +51,14 @@ def load_codes(verify=True, timeout=None):
 
     return pd.read_parquet(TEMPORARY_PATH / "codes.parquet")
 
+
 class Registry:
     def __init__(self, data_path: Path):
         self.data_path = data_path
         self.registry = []
 
     def register(self, name, url, target):
-        self.registry.append({ "name": name, "url": url , "target": target})
+        self.registry.append({"name": name, "url": url, "target": target})
 
     def report(self):
         any = False
@@ -75,7 +78,7 @@ class Registry:
 
         return any
 
-    def download(self, verify=True, timeout=None):
+    def download(self, requests_kwargs: dict):
         queue = []
 
         for item in self.registry:
@@ -85,35 +88,40 @@ class Registry:
                 queue.append(item)
 
         for index, item in enumerate(queue):
-            os.makedirs(TEMPORARY_PATH, exist_ok = True)
-            os.makedirs((self.data_path / item["target"]).parent, exist_ok = True)
+            os.makedirs(TEMPORARY_PATH, exist_ok=True)
+            os.makedirs((self.data_path / item["target"]).parent, exist_ok=True)
 
-            response = requests.get(item["url"], stream = True, verify=verify, timeout=timeout)
+            response = requests.get(item["url"], stream=True, **requests_kwargs)
             response.raise_for_status()
 
             total = int(response.headers.get('content-length', 0))
             if total == 0: total = None
 
             with Progress() as progress:
-                task = progress.add_task("Downloading {}/{} {} ...".format(index + 1, len(queue), item["name"]), total=total)
+                task = progress.add_task("Downloading {}/{} {} ...".format(index + 1, len(queue), item["name"]),
+                                         total=total)
 
                 with open(TEMPORARY_PATH / "current", "wb+") as file:
-                    for chunk in response.iter_content(chunk_size = 8192):
+                    for chunk in response.iter_content(chunk_size=8192):
                         if chunk:
                             file.write(chunk)
-                            progress.update(task, advance = len(chunk))
+                            progress.update(task, advance=len(chunk))
 
                 shutil.copy(TEMPORARY_PATH / "current", self.data_path / item["target"])
 
+
 HELP_CONFIG_PATH = "Path to your config file"
 
-def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
+
+def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
          yes: Annotated[bool, typer.Option("--yes", "-y", help="Automatically answer yes")] = False,
-         no_check_certificate: Annotated[bool, typer.Option("--no-check-certificate", help="Don't verify TLS certificates")] = False,
-         timeout: Annotated[int, typer.Option("--timeout", help="Timeout before starting to recieve data for each download")] = None):
+         requests_kwargs: list[str] | None = typer.Option(None, "--requests",
+                                                          help="Additional key=value parameters to pass to requests.get")):
     if not os.path.exists(config_path):
         print("[red]Config path does not exist[/red]")
         exit()
+
+    requests_kwargs = {key: value for key, value in [item.split("=") for item in requests_kwargs or []]}
 
     print("Loading input config ...")
     with open(config_path) as f:
@@ -128,18 +136,18 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
         print("  [green]exists[/green]")
 
     print("Loading zoning data ...")
-    df_codes = load_codes(not no_check_certificate, timeout = timeout)
+    df_codes = load_codes(**requests_kwargs)
 
     print("Identifying requested departments ...")
     regions = [str(item) for item in config["config"].get("regions", ["11"])]
     departments = [str(item) for item in config["config"].get("departments", [])]
-    
+
     if len(regions) > 0:
         df_codes = df_codes[df_codes["region_id"].isin(regions)]
 
     if len(departments) > 0:
         df_codes = df_codes[df_codes["departement_id"].isin(departments)]
-    
+
     departments = sorted(list(df_codes["departement_id"].unique()))
     print("  {}".format(departments))
 
@@ -241,7 +249,8 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
     for department in departments:
         registry.register(
             "Buildings database (BD TOPO), {}".format(department),
-            "https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-0_TOUSTHEMES_GPKG_LAMB93_D0{}_2022-03-15/BDTOPO_3-0_TOUSTHEMES_GPKG_LAMB93_D0{}_2022-03-15.7z".format(department, department),
+            "https://data.geopf.fr/telechargement/download/BDTOPO/BDTOPO_3-0_TOUSTHEMES_GPKG_LAMB93_D0{}_2022-03-15/BDTOPO_3-0_TOUSTHEMES_GPKG_LAMB93_D0{}_2022-03-15.7z".format(
+                department, department),
             "{}/BDTOPO_3-5_TOUSTHEMES_GPKG_LAMB93_D0{}_2025-12-15.7z".format(bdtopo_path, department)
         )
 
@@ -251,7 +260,7 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
             "Adresses database (BAN), {}".format(department),
             "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-{}.csv.gz".format(department),
             "{}/adresses-{}.csv.gz".format(ban_path, department)
-        )   
+        )
 
     if config["config"].get("use_urban_type", False):
         urban_type_path = config["config"].get("urban_type_path", "urban_type/UU2020_au_01-01-2023.zip")
@@ -336,7 +345,8 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
                 non_covered_regions.append(r)
         if len(gtfs_feeds) > 0:
             if yes or Confirm.ask("Your regions match with {} known GTFS feeds".format(len(gtfs_feeds)) + (
-            "\n (but {} regions have no matching feed)".format(len(non_covered_regions)) if len(non_covered_regions) > 0 else "") + "\n You might need to download missing feeds \n Do you wish to download known feeds ?"):
+                    "\n (but {} regions have no matching feed)".format(len(non_covered_regions)) if len(
+                        non_covered_regions) > 0 else "") + "\n You might need to download missing feeds \n Do you wish to download known feeds ?"):
                 for i, feed in enumerate(gtfs_feeds):
                     registry.register("GTFS Feed {}/{}".format(i + 1, len(gtfs_feeds)),
                                       feed,
@@ -350,12 +360,14 @@ def main(config_path: Annotated[Path, typer.Argument(help = HELP_CONFIG_PATH)],
     if any:
         print("[yellow]In case a download aborts, try starting the script again.[/yellow]")
         print("[yellow]Note that for most data sources progress cannot be shown.[/yellow]")
-        print("[yellow]Downloads will each have a timeout of %s before starting to recieve data" % str(timeout))
+        if "timeout" in requests_kwargs:
+            print("[yellow]Downloads will each have a timeout of %s before starting to recieve data" % str(
+                requests_kwargs["timeout"]))
 
         if not yes and not Confirm.ask("Continue downloading data?"):
             exit()
 
-        registry.download(verify=not no_check_certificate, timeout=timeout)
+        registry.download(requests_kwargs)
 
     print("[green]You are up to date![/green]")
 
