@@ -28,8 +28,7 @@ pipeline {
         stage('Test param') {
             steps {
                 script {
-                    sh '''
-                    #!bin/bash
+                    sh '''#!bin/bash
                     echo "$sampling_rates"
                     sampling_array=($sampling_rates)
                     echo "Here"
