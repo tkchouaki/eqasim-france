@@ -31,6 +31,7 @@ pipeline {
                     def samplingRates = params.sampling_rates.tokenize()
                     sh '''
                         echo "${samplingRates}"
+                        echo "${sampling_rates}"
                     '''
                     for (def value in samplingRates) {
                         sh '''
