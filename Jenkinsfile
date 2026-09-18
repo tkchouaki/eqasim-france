@@ -29,9 +29,11 @@ pipeline {
             steps {
                 script {
                     echo "value"
-                    echo params.sampling_rates
+                    echo params.sampling_rates.toString()
+                    echo "tokenize"
+                    echo params.sampling_rates.toString().tokenize()
                     echo "split"
-                    echo params.sampling_rates.split(" ")
+                    echo params.sampling_rates.toString().split(" ")
                     echo "done"
                     sh '''
                       echo $0
