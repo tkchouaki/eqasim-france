@@ -164,7 +164,7 @@ def main(config_path: Annotated[Path, typer.Argument(help=HELP_CONFIG_PATH)],
         print("  [green]exists[/green]")
 
     print("Loading zoning data ...")
-    if cache_server is None:
+    if cache_server is None or cache_server == "false":
         url_prefix=""
     else:
         url_prefix = cache_server + "?url="
