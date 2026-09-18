@@ -54,7 +54,7 @@ pipeline {
             steps {
                 // Uv downloads to home, we need to set up a location that the current user is sure to be able to write into
                 sh '''
-                    cat "$config_overrides" > test.yaml
+                    echo "$config_overrides" > test.yaml
 
                     cat test.yaml
 
