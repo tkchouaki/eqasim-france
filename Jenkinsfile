@@ -10,6 +10,11 @@ pipeline {
             defaultValue: "false",
             description: "URL of the cache server to use, False not use any server"
         )
+        string(
+            name: "sampling_rates",
+            defaultValue: "0.001",
+            description: "Space-separated list of sampling rates"
+        )
     }
 
     agent {
@@ -25,27 +30,23 @@ pipeline {
                 sh '''
                 BASE=$(pwd)
                 # Making sure old directories are cleared
-                rm -rf pipeline_data pipeline_cache output_0.1pct output_1pct output_10pct
+                rm -rf pipeline_data pipeline_cache
+                rm -rf pipeline_output_*
+
                 mkdir pipeline_data
                 mkdir pipeline_cache
-                mkdir output_0.1pct
-                mkdir output_1pct
-                mkdir output_10pct
 
                 # Download yq to modify .yml files in command line
                 python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64', 'yq')"
                 chmod +x yq
 
+                # Applying the overrides
+                echo "$config_overrides" > overrides.yml
+                python3 scripts/override_config.py overrides.yml config.yml
+                rm overrides.yml
+
                 # setting up common cache and data path
                 ./yq -i ".working_directory = \\"$BASE/pipeline_cache\\" | .config.data_path = \\"$BASE/pipeline_data\\" | .config.output_path = \\"$BASE/output_0.1pct\\" " config.yml
-
-                cp config.yml config_0.1pct.yml
-                cp config.yml config_1pct.yml
-                cp config.yml config_10pct.yml
-
-                # setting up different sampling rates and output paths
-                ./yq -i ".config.output_path = \\"$BASE/output_1pct\\" | .config.sampling_rate = 0.01" config_1pct.yml
-                ./yq -i ".config.output_path = \\"$BASE/output_10pct\\" | .config.sampling_rate = 0.1" config_10pct.yml
                 '''
             }
         }
@@ -54,10 +55,6 @@ pipeline {
             steps {
                 // Uv downloads to home, we need to set up a location that the current user is sure to be able to write into
                 sh '''
-                    echo "$config_overrides" > test.yaml
-
-                    cat test.yaml
-
                     rm -rf .home && mkdir .home
                     export HOME=$(pwd)/.home
                     uv --no-cache sync
@@ -66,39 +63,28 @@ pipeline {
             }
         }
 
-        stage('Run 0.1%') {
+        stage('Run') {
             steps {
-                sh '''
-                    uv --no-cache run -m synpp config_0.1pct.yml
-                '''
+                script {
+                    def samplingRates = params.sampling_rates.tokenize()
+                    for (def samplingRate in samplingRates) {
+                        sh '''
+                            rm -rf "pipeline_output_${samplingRate}"
+                            mkdir "pipeline_output_${samplingRate}"
+                            uv --no-cache run -m synpp config.yml --config sampling_rate "${samplingRate}" --config output_path "pipeline_output_${samplingRate}"
+                            tar -czf pipeline_output_${samplingRate}.tar.gz pipeline_output_${samplingRate}/*
+                            rm -rf "pipeline_output_${samplingRate}"
+                        '''
+                    }
+                }
             }
         }
 
-        stage('Run 1%') {
-            steps {
-                sh '''
-                    uv --no-cache run -m synpp config_1pct.yml
-                '''
-            }
-        }
-
-        stage('Run 10%') {
-            steps {
-                sh '''
-                    uv --no-cache run -m synpp config_10pct.yml
-                '''
-            }
-        }
 
         stage('Cleanup') {
             steps {
                 sh '''
                 rm -rf pipeline_data pipeline_cache
-                rm -rf output_*.tar.gz
-                tar -czf output_0.1pct.tar.gz output_0.1pct/*
-                tar -czf output_1pct.tar.gz output_1pct/*
-                tar -czf output_10pct.tar.gz output_10pct/*
-                rm -rf output_0.1pct output_1pct output_10pct
                 '''
             }
         }
@@ -106,7 +92,7 @@ pipeline {
 
     post {
         success {
-            archiveArtifacts artifacts: 'output_0.1pct.tar.gz,output_1pct.tar.gz,output_10pct.tar.gz', fingerprint: true
+            archiveArtifacts artifacts: 'pipeline_output_*.tar.gz', fingerprint: true
         }
     }
 }
