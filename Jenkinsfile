@@ -30,10 +30,9 @@ pipeline {
                 script {
                     echo "value"
                     echo params.sampling_rates
-                    echo "tokenize"
-                    echo params.sampling_rates.tokenize()
                     echo "split"
                     echo params.sampling_rates.split(" ")
+                    echo "done"
                     sh '''
                       echo $0
                       echo "$sampling_rates"
