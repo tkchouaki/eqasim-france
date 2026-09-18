@@ -33,7 +33,10 @@ pipeline {
                     echo "trim and split"
                     def test = params.sampling_rates.toString().trim().split(/\s+/)
                     echo "done trimming"
-                    echo test
+                    for (def v in test) {
+                        echo v
+                    }
+
                     echo "tokenize"
                     echo params.sampling_rates.toString().tokenize()
                     echo "split"
