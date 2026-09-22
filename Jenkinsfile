@@ -118,7 +118,9 @@ pipeline {
                     rm -rf archived_pipeline_output
                     mkdir archived_pipeline_output
                     cd pipeline_output
+                    ls
                     for i in *; do
+                        echo "Archiving $i"
                         tar -czf "../archived_pipeline_output/$i.tar.gz" $i/*
                     done
                     cd ..
