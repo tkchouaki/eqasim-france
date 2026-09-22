@@ -50,6 +50,14 @@ pipeline {
     }
 
     stages {
+        stage("Describe build") {
+            steps {
+                script {
+                    currentBuild.description = "Hello World"
+                }
+            }
+        }
+
         stage('Prepare') {
             steps {
                 sh '''
@@ -101,8 +109,6 @@ pipeline {
                             rm -rf "pipeline_output/output_${samplingRate}"
                             mkdir "pipeline_output/output_${samplingRate}"
                             uv --no-cache run -m synpp --config sampling_rate "${samplingRate}" --config output_path "pipeline_output/output_${samplingRate}" config.yml
-                            tar -czf pipeline_output/output_${samplingRate}.tar.gz pipeline_output/output_${samplingRate}/*
-                            rm -rf "pipeline_output/output_${samplingRate}"
                         '''
                     }
                 }
@@ -115,17 +121,12 @@ pipeline {
                 script {
                     if(params.archive_outputs) {
                     sh '''
-                    rm -rf archived_pipeline_output
-                    mkdir archived_pipeline_output
                     cd pipeline_output
-                    ls
                     for i in *; do
                         echo "Archiving $i"
-                        tar -czf "../archived_pipeline_output/$i.tar.gz" $i/*
+                        tar -czf "$i.tar.gz" $i/*
                     done
                     cd ..
-                    rm -rf pipeline_output
-                    mv archived_pipeline_output pipeline_output
                     '''
                     }
 
