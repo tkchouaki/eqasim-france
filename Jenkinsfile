@@ -14,6 +14,26 @@ pipeline {
             name: "sampling_rates",
             defaultValue: params.sampling_rates ?:"0.001",
             description: "Space-separated list of sampling rates"
+        ),
+        booleanParam(
+            name: 'archive_outputs',
+            defaultValue: params.archive_outputs ?:true,
+            description: 'Whether you want to archive the outputs generated with the specified sampling rate'
+        ),
+        booleanParam(
+            name: 'archive_cache',
+            defaultValue: params.archive_cache ?: false,
+            description: 'Whether you want to archive the cache directory'
+        ),
+        booleanParam(
+            name: 'archive_data',
+            defaultValue: params.archive_cache ?: false,
+            description: 'Whether you want to archive the downloaded data used to generate the synthetic population'
+        ),
+        booleanParam(
+            name: 'archive_repo',
+            defaultValue: params.archive_repo ?: false,
+            description: 'Whether you want to archive the executed version of the repository'
         )
     }
 
@@ -30,11 +50,11 @@ pipeline {
                 sh '''
                 BASE=$(pwd)
                 # Making sure old directories are cleared
-                rm -rf pipeline_data pipeline_cache
-                rm -rf pipeline_output_*
+                rm -rf pipeline_data pipeline_cache pipeline_output
 
                 mkdir pipeline_data
                 mkdir pipeline_cache
+                mkdir pipeline_output
 
                 # Download yq to modify .yml files in command line
                 python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64', 'yq')"
@@ -70,11 +90,11 @@ pipeline {
                     for (def samplingRate in samplingRates) {
                         sh '''
                             samplingRate='''+samplingRate+'''
-                            rm -rf "pipeline_output_${samplingRate}"
-                            mkdir "pipeline_output_${samplingRate}"
-                            uv --no-cache run -m synpp --config sampling_rate "${samplingRate}" --config output_path "pipeline_output_${samplingRate}" config.yml
-                            tar -czf pipeline_output_${samplingRate}.tar.gz pipeline_output_${samplingRate}/*
-                            rm -rf "pipeline_output_${samplingRate}"
+                            rm -rf "pipeline_output/output_${samplingRate}"
+                            mkdir "pipeline_output/output_${samplingRate}"
+                            uv --no-cache run -m synpp --config sampling_rate "${samplingRate}" --config output_path "pipeline_output/output_${samplingRate}" config.yml
+                            tar -czf pipeline_output/output_${samplingRate}.tar.gz pipeline_output/output_${samplingRate}/*
+                            rm -rf "pipeline_output/output_${samplingRate}"
                         '''
                     }
                 }
@@ -82,18 +102,34 @@ pipeline {
         }
 
 
-        stage('Cleanup') {
+        stage('Prepare artifacts') {
             steps {
-                sh '''
-                rm -rf pipeline_data pipeline_cache
-                '''
+                script {
+                    if(params.archive_outputs) {
+                    sh '''
+                    for i in pipeline_output/*; do
+                        tar -czf "$i.tar.gz" $i/*
+                        rm -rf "$i"
+                    done
+                    '''
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            archiveArtifacts artifacts: 'pipeline_output_*.tar.gz', fingerprint: true
+            script {
+                def artifacts = []
+                if (params.archive_outputs) {
+                    artifacts << 'pipeline_output/*'
+                }
+
+                if (artifacts) {
+                    archiveArtifacts artifacts: artifacts.join(','), fingerprint: true
+                }
+            }
         }
     }
 }
