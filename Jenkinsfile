@@ -168,6 +168,18 @@ pipeline {
                     artifacts << 'pipeline_output/*'
                 }
 
+                if (params.archive_cache) {
+                    artifacts << "pipeline_cache.tar.gz"
+                }
+
+                if (params.archive_data) {
+                    artifacts << "pipeline_data.tar.gz"
+                }
+
+                if (params.archive_data) {
+                    artifacts << "repo.tar.gz"
+                }
+
                 if (artifacts) {
                     archiveArtifacts artifacts: artifacts.join(','), fingerprint: true
                 }
