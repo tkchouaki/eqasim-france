@@ -63,6 +63,11 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh '''
+                # UV will want to write into the home directory which is not necessarily writable (Docker user VS host user)
+                # So we put the home directory right where we are
+                rm -rf .home && mkdir .home
+                export HOME=$(pwd)/.home
+
                 BASE=$(pwd)
                 # Making sure old directories are cleared
                 rm -rf pipeline_data pipeline_cache pipeline_output
@@ -108,8 +113,6 @@ pipeline {
             steps {
                 // We use uv with --no-cache to prevent it from writing into the home directory
                 sh '''
-                    rm -rf .home && mkdir .home
-                    export HOME=$(pwd)/.home
                     uv --no-cache sync
                     uv --no-cache run scripts/download.py -y --requests verify=false --requests timeout=300 --cache-server "$cache_server" config.yml
                 '''
