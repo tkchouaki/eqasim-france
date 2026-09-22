@@ -37,7 +37,7 @@ pipeline {
         )
         string(
             name: 'download_retries',
-            defaultValue: params.download_retries ?: 3
+            defaultValue: params.download_retries ?: 3,
             description: 'Number of times to retry downloading of necessary files in case of failure'
         )
     }
