@@ -54,7 +54,7 @@ pipeline {
             steps {
                 script {
                     currentBuild.title = "My Title"
-                    currentBuild.description = "Hello World"
+                    currentBuild.description = "Hello World, this is a rather long description for just a build but I want to test out the display"
                 }
             }
         }
