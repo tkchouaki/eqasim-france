@@ -14,22 +14,22 @@ pipeline {
             name: "sampling_rates",
             defaultValue: params.sampling_rates ?:"0.001",
             description: "Space-separated list of sampling rates"
-        ),
+        )
         booleanParam(
             name: 'archive_outputs',
             defaultValue: params.archive_outputs ?:true,
             description: 'Whether you want to archive the outputs generated with the specified sampling rate'
-        ),
+        )
         booleanParam(
             name: 'archive_cache',
             defaultValue: params.archive_cache ?: false,
             description: 'Whether you want to archive the cache directory'
-        ),
+        )
         booleanParam(
             name: 'archive_data',
             defaultValue: params.archive_cache ?: false,
             description: 'Whether you want to archive the downloaded data used to generate the synthetic population'
-        ),
+        )
         booleanParam(
             name: 'archive_repo',
             defaultValue: params.archive_repo ?: false,
