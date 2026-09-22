@@ -115,12 +115,12 @@ pipeline {
                 script {
                     if(params.archive_outputs) {
                     sh '''
-                    for i in pipeline_output/*; do
-                        tar -czf "$i.tar.gz" $i/*
-                        rm -rf "$i"
+                    rm -rf archived_pipeline_output
+                    mkdir -p archived_pipeline_output
+                    cd pipeline_output
+                    for i in *; do
+                        tar -czf "../archived_pipeline_output/$i.tar.gz" $i/*
                     done
-                    '''
-                    }
                 }
             }
         }
