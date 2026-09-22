@@ -35,6 +35,11 @@ pipeline {
             defaultValue: params.archive_repo ?: false,
             description: 'Whether you want to archive the executed version of the repository'
         )
+        string(
+            name: 'download_retries',
+            defaultValue: params.download_retries ?: 3
+            description: 'Number of times to retry downloading of necessary files in case of failure'
+        )
     }
 
     agent {
@@ -72,6 +77,9 @@ pipeline {
         }
 
         stage('DownloadData') {
+            options {
+                retry(params.download_retries as Integer)
+            }
             steps {
                 // Uv downloads to home, we need to set up a location that the current user is sure to be able to write into
                 sh '''
