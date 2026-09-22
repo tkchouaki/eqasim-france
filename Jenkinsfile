@@ -82,6 +82,8 @@ pipeline {
                 cat /etc/passwd
                 ls -l ..
                 uv --no-cache run scripts/override_config.py overrides.yml config.yml
+                ls -al /
+                whoami
                 rm overrides.yml
 
                 # setting up common cache and data path
