@@ -80,9 +80,11 @@ pipeline {
                 ls -al /
                 ls -al /home
                 cat /etc/passwd
-                ls -l ..
+                ls -al ..
+                ls -al
                 uv --no-cache run scripts/override_config.py overrides.yml config.yml
                 ls -al /
+                ls -al
                 whoami
                 rm overrides.yml
 
