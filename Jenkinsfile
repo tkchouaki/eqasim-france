@@ -82,15 +82,7 @@ pipeline {
 
                 # Applying the overrides
                 echo "$config_overrides" > overrides.yml
-                ls -al /
-                ls -al /home
-                cat /etc/passwd
-                ls -al ..
-                ls -al
                 uv --no-cache run scripts/override_config.py overrides.yml config.yml
-                ls -al /
-                ls -al
-                whoami
                 rm overrides.yml
 
                 # setting up common cache and data path
