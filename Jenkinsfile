@@ -79,8 +79,8 @@ pipeline {
                 echo "$config_overrides" > overrides.yml
                 ls /
                 ls /home
-                whoami
                 cat /etc/passwd
+                whoami
                 uv --no-cache run scripts/override_config.py overrides.yml config.yml
                 rm overrides.yml
 
