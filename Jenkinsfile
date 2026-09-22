@@ -116,11 +116,41 @@ pipeline {
                     if(params.archive_outputs) {
                     sh '''
                     rm -rf archived_pipeline_output
-                    mkdir -p archived_pipeline_output
+                    mkdir archived_pipeline_output
                     cd pipeline_output
                     for i in *; do
                         tar -czf "../archived_pipeline_output/$i.tar.gz" $i/*
                     done
+                    cd ..
+                    rm -rf pipeline_output
+                    mv archived_pipeline_output pipeline_output
+                    '''
+                    }
+
+                    if(params.archive_cache) {
+                        sh '''
+                        tar -czf pipeline_cache.tar.gz pipeline_cache/*
+                        '''
+                    }
+
+                    if(params.archive_data) {
+                        sh '''
+                        tar -czf pipeline_data.tar.gz pipeline_data/*
+                        '''
+                    }
+
+                    if(params.archive_repo) {
+                        sh '''
+                        rm -rf .prepare_artifacts_temp
+                        mkdir .prepare_artifacts_temp
+                        mv pipeline_output .prepare_artifacts_temp/
+                        mv pipeline_cache .prepare_artifacts_temp/
+                        mv pipeline_data .prepare_artifacts_temp/
+                        tar -czf repo.tar.gz *
+                        mv .prepare_artifacts_temp/* /.
+                        rm -rf .prepare_artifacts_temp
+                        '''
+                    }
                 }
             }
         }
