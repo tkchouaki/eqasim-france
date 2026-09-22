@@ -53,8 +53,8 @@ pipeline {
         stage("Describe build") {
             steps {
                 script {
-                    currentBuild.displayName = "My Title"
-                    currentBuild.description = "Hello World, this is a rather long description for just a build but I want to test out the display"
+                    currentBuild.description = sh(script: 'git log -1 --pretty=%B', returnStdout: true)
+                    currentBuild.displayName = sh(script: 'git rev-parse --short HEAD', returnStdout: true)
                 }
             }
         }
