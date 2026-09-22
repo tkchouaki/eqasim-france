@@ -2,6 +2,7 @@ pipeline {
     parameters {
         text(
             name: "config_overrides",
+            // we check if the default value has been overrided from the interface
             defaultValue: params.config_overrides ?:"config:\n  random_seed: 1234",
             description: "Parts of yaml config to override, the default has no effect as it rewrite the same random seed"
         )
@@ -87,10 +88,14 @@ pipeline {
 
         stage('DownloadData') {
             options {
+                /*
+                Some times, when using a cache server, the timeout is reached before we start receiving data.
+                In this case, the server keeps downloading so we can try again.
+                */
                 retry(params.download_retries as Integer)
             }
             steps {
-                // Uv downloads to home, we need to set up a location that the current user is sure to be able to write into
+                // We use uv with --no-cache to prevent it from writing into the home directory
                 sh '''
                     rm -rf .home && mkdir .home
                     export HOME=$(pwd)/.home
