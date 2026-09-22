@@ -154,6 +154,7 @@ pipeline {
                     if(params.archive_repo) {
                         sh '''
                         rm -rf .prepare_artifacts_temp
+                        rm -f repo.tar.gz
                         mkdir .prepare_artifacts_temp
                         mv pipeline_output .prepare_artifacts_temp/
                         mv pipeline_cache .prepare_artifacts_temp/
