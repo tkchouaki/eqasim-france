@@ -77,8 +77,8 @@ pipeline {
 
                 # Applying the overrides
                 echo "$config_overrides" > overrides.yml
-                ls /
-                ls /home
+                ls -l /
+                ls -l /home
                 cat /etc/passwd
                 ls -l ..
                 whoami
