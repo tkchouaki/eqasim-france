@@ -77,11 +77,10 @@ pipeline {
 
                 # Applying the overrides
                 echo "$config_overrides" > overrides.yml
-                ls -l /
-                ls -l /home
+                ls -al /
+                ls -al /home
                 cat /etc/passwd
                 ls -l ..
-                whoami
                 uv --no-cache run scripts/override_config.py overrides.yml config.yml
                 rm overrides.yml
 
