@@ -53,7 +53,7 @@ pipeline {
         stage("Describe build") {
             steps {
                 script {
-                    currentBuild.title = "My Title"
+                    currentBuild.displayName = "My Title"
                     currentBuild.description = "Hello World, this is a rather long description for just a build but I want to test out the display"
                 }
             }
